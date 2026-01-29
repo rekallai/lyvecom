@@ -80,6 +80,72 @@ cd services/api
 yarn docs:generate           # Generate OpenAPI documentation from routes
 ```
 
+## Development vs Production Environments
+
+### Local Development
+
+Local development uses `docker-compose.yml` which references `Dockerfile.dev` for both services:
+
+```bash
+# Start all services locally
+docker compose up
+
+# Rebuild after dependency changes
+docker compose up --build
+
+# Stop services
+docker compose down
+```
+
+**Key characteristics:**
+- Uses `Dockerfile.dev` (development-optimized with hot reloading)
+- Mounts local source directories as volumes for live code updates
+- Runs on localhost ports (2200, 2300, 27017)
+- Auto-loads fixtures on empty database
+- Default admin: `admin@bedrock.foundation` / `development.now`
+
+**Alternative: Run without Docker**
+```bash
+# Requires Node.js 24.12.0 (use Volta for version management)
+# Terminal 1 - MongoDB
+docker run -p 27017:27017 mongo:8.0.9
+
+# Terminal 2 - API
+cd services/api
+yarn start
+
+# Terminal 3 - Web
+cd services/web
+yarn start
+```
+
+### Staging/Production Deployment
+
+Production deployments use the [Bedrock CLI](https://github.com/bedrockio/bedrock-cli) and Kubernetes:
+
+```bash
+# Install Bedrock CLI (requires gcloud CLI and Terraform)
+curl -s https://install.bedrock.io | bash
+
+# Build production Docker images
+bedrock cloud build           # Select services interactively
+bedrock cloud build api       # Build specific service
+bedrock cloud build api jobs  # Build sub-service (Dockerfile.jobs)
+
+# Deploy to cloud
+bedrock cloud deploy          # Deploy all services
+bedrock cloud deploy api      # Deploy specific service
+```
+
+**Key characteristics:**
+- Uses production `Dockerfile` (optimized, multi-stage builds)
+- Deployed to Google Kubernetes Engine (GKE)
+- Configuration in `deployment/environments/{staging,production}/`
+- Managed secrets via Bedrock CLI (never commit secrets)
+- See `deployment/README.md` for full provisioning and deployment docs
+
+**Important:** Local development changes to `docker-compose.yml` and `Dockerfile.dev` do NOT affect production deployments.
+
 ## Architecture
 
 ### Service Ports

@@ -4,6 +4,7 @@ services:
       - MONGO_URI=mongodb://mongo/bedrock_dev
     build:
       context: ./services/api
+      dockerfile: Dockerfile.dev
       args:
         NODE_ENV: development
     command: yarn start
@@ -24,7 +25,7 @@ services:
   web:
     build:
       context: ./services/web
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
       args:
         NODE_ENV: development
     command: yarn start

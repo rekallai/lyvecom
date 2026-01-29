@@ -1,0 +1,20 @@
+FROM node:24.12.0-alpine
+
+# Update & install required packages
+RUN apk add --update bash curl
+
+# Set work directory
+WORKDIR /service
+
+# Install dependencies
+COPY package.json yarn.lock ./
+COPY serve/package.json serve/yarn.lock ./serve/
+
+RUN yarn install --frozen-lockfile
+
+# Copy app source
+COPY . .
+
+EXPOSE 2200
+
+CMD ["yarn", "start"]
